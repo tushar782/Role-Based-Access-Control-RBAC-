@@ -1,0 +1,28 @@
+# Node modules
+node_modules/
+ 
+# Environment variables
+backend/.env
+
+# Logs
+logs/
+*.log
+
+# Build directories
+dist/
+build/
+.vite/
+
+# Dependencies lock files (optional)
+package-lock.json
+backend/package-lock.json
+frontend/package-lock.json
+
+# Vercel deployment files
+.vercel
+backend/vercel.json
+frontend/vercel.json
+
+# Cache & temp files
+.DS_Store
+*.cache
