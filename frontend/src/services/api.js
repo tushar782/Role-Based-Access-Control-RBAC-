@@ -4,10 +4,15 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://rbac-backend-theta.verc
 
 const api = axios.create({
     baseURL: API_URL,
-    withCredentials: true
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+        // Add this to handle CORS
+        'Access-Control-Allow-Credentials': true
+    }
 });
 
-// Request Interceptor - Adds Token to Headers
+// Request Interceptor
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -18,33 +23,48 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-// Response Interceptor - Handle Unauthorized Errors
+// Response Interceptor
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        console.error('API Error:', error);  // Add error logging
         if (error.response?.status === 401) {
             localStorage.removeItem('token');
-            window.location.href = '/login';  // Redirect to login if unauthorized
+            window.location.href = '/login';
         }
         return Promise.reject(error);
     }
 );
 
-// Auth API Calls
-export const loginUser = async (data) => {
-    const response = await api.post('/auth/login', data);
-    return response.data;
-};
-
+// Auth API Calls with error handling
 export const registerUser = async (data) => {
-    const response = await api.post('/auth/register', data);
-    return response.data;
+    try {
+        const response = await api.post('/auth/register', data);
+        return response.data;
+    } catch (error) {
+        console.error('Register Error:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
-// Get User Dashboard Data
+export const loginUser = async (data) => {
+    try {
+        const response = await api.post('/auth/login', data);
+        return response.data;
+    } catch (error) {
+        console.error('Login Error:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
 export const getDashboardData = async (role) => {
-    const response = await api.get(`/users/${role}`);
-    return response.data;
+    try {
+        const response = await api.get(`/users/${role}`);
+        return response.data;
+    } catch (error) {
+        console.error('Dashboard Error:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
 export default api;
