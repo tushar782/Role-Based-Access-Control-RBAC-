@@ -9,18 +9,32 @@ dbConnect();
 
 const app = express();
 
-// CORS Middleware
+// Updated CORS configuration
 app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-        'https://rbac-frontend.vercel.app',  // Add your Vercel frontend URL
-        /\.vercel\.app$/  // Allow all subdomains on vercel.app
+    origin: ['https://rbac-ruddy.vercel.app', 'http://localhost:5173'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+        'Origin',
+        'X-Requested-With',
+        'Content-Type',
+        'Accept',
+        'Authorization',
     ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    exposedHeaders: ['Set-Cookie']
 }));
+
+// Additional headers for CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,Accept,Authorization');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
 
 // Middleware
 app.use(express.json());
@@ -33,7 +47,6 @@ app.use('/api/users', userRoutes);
 if (process.env.VERCEL) {
     module.exports = app;
 } else {
-    // Start the Server (for local development)
     const PORT = process.env.PORT || 7001;
     app.listen(PORT, () => {
         console.log(`Server is running on port : ${PORT}`);
